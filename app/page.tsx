@@ -115,6 +115,7 @@ export default function Home() {
   const [selectedLookId, setSelectedLookId] = useState<string>("");
   const [compareLookId, setCompareLookId] = useState<string>("");
   const [removingBg, setRemovingBg] = useState(false);
+  const [bgStatus, setBgStatus] = useState("");
 
   const activeOverlay = frozenFrame;
   const selectedLook = useMemo(
@@ -175,6 +176,11 @@ export default function Home() {
       videoRef.current.srcObject = stream;
       await videoRef.current.play();
       setCameraReady(true);
+
+      // Preload background removal model while user frames the shot
+      import("@imgly/background-removal").then(({ preload }) => {
+        preload({ model: "isnet_quint8" }).catch(() => {});
+      }).catch(() => {});
     } catch {
       setCameraReady(false);
       setCameraError("카메라 권한이 필요합니다.");
@@ -207,17 +213,28 @@ export default function Home() {
     setFrozenFrame(rawFrame);
     setCameraError("");
     setRemovingBg(true);
+    setBgStatus("준비 중…");
 
     try {
       const { removeBackground } = await import("@imgly/background-removal");
       const blob = await removeBackground(rawFrame, {
-        output: { format: "image/png", quality: 1 }
+        model: "isnet_quint8",
+        output: { format: "image/png", quality: 0.9 },
+        progress: (key: string, current: number, total: number) => {
+          if (key.startsWith("fetch:")) {
+            const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+            setBgStatus(pct < 100 ? `다운로드 ${pct}%` : "모델 로딩 중…");
+          } else {
+            setBgStatus("누끼 처리 중…");
+          }
+        }
       });
       setFrozenFrame(await blobToDataUrl(blob));
     } catch {
       // 누끼 실패 시 원본 프레임 유지
     } finally {
       setRemovingBg(false);
+      setBgStatus("");
     }
   }
 
@@ -419,7 +436,7 @@ export default function Home() {
               ) : (
                 <video ref={videoRef} autoPlay muted playsInline />
               )}
-              {removingBg && <div className="bgRemovingBadge">누끼 처리중…</div>}
+              {removingBg && <div className="bgRemovingBadge">{bgStatus || "누끼 처리중…"}</div>}
               <span
                 className="handle topLeft"
                 onPointerDown={onHandlePointerDown}
