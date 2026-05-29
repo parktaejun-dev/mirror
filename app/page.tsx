@@ -55,6 +55,26 @@ function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
+async function resizePhoto(file: File, maxDim = 1920): Promise<string> {
+  try {
+    // createImageBitmap lets the browser decode at reduced resolution → less memory
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+    const w = Math.round(bitmap.width * scale);
+    const h = Math.round(bitmap.height * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) { bitmap.close(); return readFile(file); }
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    bitmap.close();
+    return canvas.toDataURL("image/jpeg", 0.85);
+  } catch {
+    return readFile(file);
+  }
+}
+
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image();
@@ -190,7 +210,7 @@ export default function Home() {
   async function onPhotoChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
-    setPhoto(await readFile(file));
+    setPhoto(await resizePhoto(file));
     setSelectedLookId("");
     setCompareLookId("");
   }
