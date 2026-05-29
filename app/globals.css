@@ -1,0 +1,423 @@
+:root {
+  color-scheme: light;
+  --bg: #f7f7f3;
+  --panel: #fbfbf8;
+  --panel-strong: #ffffff;
+  --ink: #20211f;
+  --muted: #6e7169;
+  --line: #d9ddd3;
+  --accent: #2d63d8;
+  --accent-soft: #eef3ff;
+  --danger: #9a3d33;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.appShell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 100svh;
+  max-width: 520px;
+  margin: 0 auto;
+  background: var(--bg);
+}
+
+.topBar {
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  align-items: center;
+  gap: 8px;
+  padding: max(12px, env(safe-area-inset-top)) 16px 10px;
+}
+
+.topBar h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 25px;
+  font-weight: 760;
+  line-height: 1.1;
+}
+
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+}
+
+.iconButton:active {
+  background: #eceee8;
+}
+
+.hiddenInput {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.stageWrap {
+  min-height: 0;
+  padding: 0 12px 8px;
+}
+
+.stage {
+  position: relative;
+  height: 100%;
+  min-height: 360px;
+  max-height: calc(100svh - 355px);
+  aspect-ratio: 3 / 4;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #e9e8e1;
+  touch-action: none;
+}
+
+.stagePhoto,
+.stage video,
+.overlayFrame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stagePhoto {
+  display: block;
+}
+
+.emptyStage {
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.65), rgb(255 255 255 / 0.16)),
+    #e7e5dd;
+  color: var(--ink);
+}
+
+.emptyStage strong {
+  font-size: 22px;
+}
+
+.overlayFrame {
+  position: absolute;
+  width: 48%;
+  aspect-ratio: 4 / 5;
+  border: 2px dashed var(--accent);
+  transform-origin: center;
+  cursor: grab;
+  touch-action: none;
+  background: rgb(255 255 255 / 0.12);
+}
+
+.overlayFrame:active {
+  cursor: grabbing;
+}
+
+.overlayFrame video {
+  display: block;
+}
+
+.handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  background: var(--panel-strong);
+  touch-action: none;
+}
+
+.handle.topLeft,
+.handle.bottomRight {
+  cursor: nwse-resize;
+}
+
+.handle.topRight,
+.handle.bottomLeft {
+  cursor: nesw-resize;
+}
+
+.topLeft {
+  top: -11px;
+  left: -11px;
+}
+
+.topRight {
+  top: -11px;
+  right: -11px;
+}
+
+.bottomLeft {
+  bottom: -11px;
+  left: -11px;
+}
+
+.bottomRight {
+  right: -11px;
+  bottom: -11px;
+}
+
+.notice {
+  margin: 8px auto 0;
+  max-width: 460px;
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.controlDock {
+  display: grid;
+  gap: 14px;
+  padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: 0 -12px 28px rgb(34 35 31 / 0.08);
+}
+
+.toolRow {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.toolButton {
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  min-height: 64px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel-strong);
+  color: var(--ink);
+}
+
+.toolButton span {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toolButton.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #f9fbff;
+}
+
+.sliders {
+  display: grid;
+  gap: 9px;
+}
+
+.sliders label {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 10px;
+}
+
+.sliders span {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 680;
+}
+
+.sliders b {
+  text-align: right;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.compareHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+  color: var(--ink);
+}
+
+.compareHead strong {
+  font-size: 15px;
+}
+
+.compareHead span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.compareStrip {
+  display: grid;
+  grid-auto-columns: 78px;
+  grid-auto-flow: column;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.compareStrip::-webkit-scrollbar {
+  display: none;
+}
+
+.thumb {
+  display: grid;
+  place-items: center;
+  width: 78px;
+  height: 92px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-strong);
+  color: var(--muted);
+}
+
+.thumb.selected {
+  border: 2px solid var(--accent);
+}
+
+.thumb.compare {
+  border: 2px solid var(--ink);
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb.empty {
+  border-style: dashed;
+  background: #f4f5f0;
+  cursor: default;
+}
+
+.compareView {
+  display: grid;
+  grid-template-columns: 1fr 2px 1fr;
+  width: 100%;
+  height: 100%;
+}
+
+.compareImg {
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.compareDivider {
+  width: 2px;
+  background: white;
+}
+
+@media (min-width: 760px) {
+  .appShell {
+    max-width: 1120px;
+    grid-template-columns: minmax(380px, 1fr) 360px;
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: 18px;
+    padding: 0 24px 24px;
+  }
+
+  .topBar {
+    grid-column: 1 / -1;
+    max-width: 520px;
+    width: 100%;
+    justify-self: center;
+  }
+
+  .stageWrap {
+    display: grid;
+    align-content: start;
+    padding: 0;
+  }
+
+  .stage {
+    width: min(64vh, 520px);
+    max-height: none;
+  }
+
+  .controlDock {
+    align-self: start;
+    margin-top: 0;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: none;
+  }
+
+  .toolRow {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 380px) {
+  .topBar {
+    padding-inline: 12px;
+  }
+
+  .stageWrap {
+    padding-inline: 8px;
+  }
+
+  .controlDock {
+    padding-inline: 10px;
+  }
+
+  .toolRow {
+    gap: 6px;
+  }
+
+  .toolButton {
+    min-height: 58px;
+    border-radius: 12px;
+  }
+
+  .toolButton span {
+    font-size: 12px;
+  }
+}
