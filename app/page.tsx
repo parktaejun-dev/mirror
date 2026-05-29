@@ -46,6 +46,15 @@ function readFile(file: File): Promise<string> {
   });
 }
 
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image();
@@ -105,6 +114,7 @@ export default function Home() {
   const [savedLooks, setSavedLooks] = useState<SavedLook[]>([]);
   const [selectedLookId, setSelectedLookId] = useState<string>("");
   const [compareLookId, setCompareLookId] = useState<string>("");
+  const [removingBg, setRemovingBg] = useState(false);
 
   const activeOverlay = frozenFrame;
   const selectedLook = useMemo(
@@ -179,7 +189,7 @@ export default function Home() {
     setCompareLookId("");
   }
 
-  function freezeFrame() {
+  async function freezeFrame() {
     const video = videoRef.current;
     if (!video || !cameraReady || !video.videoWidth || !video.videoHeight) {
       setCameraError("카메라를 먼저 켜주세요.");
@@ -192,8 +202,23 @@ export default function Home() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    setFrozenFrame(canvas.toDataURL("image/jpeg", 0.92));
+    const rawFrame = canvas.toDataURL("image/jpeg", 0.92);
+
+    setFrozenFrame(rawFrame);
     setCameraError("");
+    setRemovingBg(true);
+
+    try {
+      const { removeBackground } = await import("@imgly/background-removal");
+      const blob = await removeBackground(rawFrame, {
+        output: { format: "image/png", quality: 1 }
+      });
+      setFrozenFrame(await blobToDataUrl(blob));
+    } catch {
+      // 누끼 실패 시 원본 프레임 유지
+    } finally {
+      setRemovingBg(false);
+    }
   }
 
   async function saveLook() {
@@ -394,6 +419,7 @@ export default function Home() {
               ) : (
                 <video ref={videoRef} autoPlay muted playsInline />
               )}
+              {removingBg && <div className="bgRemovingBadge">누끼 처리중…</div>}
               <span
                 className="handle topLeft"
                 onPointerDown={onHandlePointerDown}
@@ -433,7 +459,7 @@ export default function Home() {
           <ControlButton active={cameraReady && !frozenFrame} label="카메라" onClick={startCamera}>
             <Camera size={24} />
           </ControlButton>
-          <ControlButton active={Boolean(frozenFrame)} label="고정" onClick={freezeFrame}>
+          <ControlButton active={Boolean(frozenFrame) && !removingBg} label={removingBg ? "처리중" : "고정"} onClick={freezeFrame}>
             <Snowflake size={24} />
           </ControlButton>
           <ControlButton label="저장" onClick={saveLook}>

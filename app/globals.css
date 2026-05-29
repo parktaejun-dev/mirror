@@ -105,11 +105,16 @@ button {
 }
 
 .stagePhoto,
-.stage video,
-.overlayFrame img {
+.stage video {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.overlayFrame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .stagePhoto {
@@ -141,11 +146,33 @@ button {
   transform-origin: center;
   cursor: grab;
   touch-action: none;
-  background: rgb(255 255 255 / 0.12);
+  background: transparent;
 }
 
 .overlayFrame:active {
   cursor: grabbing;
+}
+
+.bgRemovingBadge {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 650;
+  border-radius: 20px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .overlayFrame video {
